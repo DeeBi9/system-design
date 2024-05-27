@@ -1,0 +1,33 @@
+FROM python:3.11.6
+
+# Set environment variables to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update || (sleep 30 && apt-get update) \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        default-libmysqlclient-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
+
+# Set the working directory
+WORKDIR /app
+
+# Copy requirements file
+COPY ./requirements.txt /app
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --requirement /app/requirements.txt
+
+# Copy the rest of the application code
+COPY . /app
+
+# Expose the application port
+EXPOSE 5000
+
+# Command to run the application
+CMD ["python3", "server.py"]
